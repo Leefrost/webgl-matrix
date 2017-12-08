@@ -1,13 +1,23 @@
 var symbolSize = 30;
 var streams = [];
+var backgroundColor = 0;
+var canvasWidth = window.innerWidth;
+var canvasHeight = window.innerHeight;
+
+var minSymbolsSpeed = 6;
+var maxSymbolsSpeed = 12;
+
+var minStreamLenght = 5;
+var maxStreamLenght = 30;
 
 function setup(){
     createCanvas(
-        window.innerWidth,
-        window.innerHeight
+        canvasWidth,
+        canvasHeight
     );
-    background(0);
+    background(backgroundColor);
     textSize(symbolSize);
+
     var x = 0; 
     for (var i = 0; i<= width / symbolSize; i++){
         var stream = new Stream();
@@ -18,18 +28,19 @@ function setup(){
 }
 
 function draw(){
-    background(0,180);
+    background(backgroundColor, 180);
     streams.forEach(function(stream){
         stream.render();
     });
 }
 
-function Symbol(x,y, speed, first){
+function Symbol(x, y, speed, isFirst){
     this.x = x;
     this.y = y;
     this.speed = speed;
     this.switchInterval = round(random(2,20));
-    this.first = first;
+    this.isFirst = isFirst;
+    
     this.value;
 
     this.setToRandomSymbol = function(){
@@ -40,7 +51,7 @@ function Symbol(x,y, speed, first){
         }
     }
 
-    this.rain = function(){
+    this.moveDown = function(){
         if(this.y >= height)
             this.y = 0;
         else
@@ -51,16 +62,17 @@ function Symbol(x,y, speed, first){
 
 function  Stream(){
     this.symbols = [];
-    this.totalSymbols = round(random(5,30));
-    this.speed = round(random(6,12));
+    this.totalSymbols = round(random(minStreamLenght, maxStreamLenght));
+    this.speed = round(random(minSymbolsSpeed, maxSymbolsSpeed));
 
-    this.generateSymbols = function(x,y){
+    this.generateSymbols = function(x, y){
         var first = round(random(0,4)) == 1;
         for(var i = 0; i<= this.totalSymbols; i++)
         {
-            var symbol =  new Symbol(x,y,this.speed, first);
+            var symbol =  new Symbol(x, y, this.speed, first);
             symbol.setToRandomSymbol();
             this.symbols.push(symbol);
+            
             y -= symbolSize;
             first = false;
         }
@@ -68,14 +80,13 @@ function  Stream(){
 
     this.render = function (){
         this.symbols.forEach(function(symbol){
-            if(symbol.first)
+            if(symbol.isFirst)
                 fill(180,255,180);
             else
                  fill(0,255,70)
             text(symbol.value, symbol.x, symbol.y);
-            symbol.rain();
+            symbol.moveDown();
             symbol.setToRandomSymbol();
         })
     }
-
 }
